@@ -81,11 +81,8 @@ app.listen(PORT, () => {
   console.log(`\n🔧 MCP Protocol Endpoints:`);
   console.log(`   POST /mcp/initialize      - Initialize MCP connection`);
   console.log(`   GET  /mcp/tools           - List all tools`);
-  console.log(`   POST /mcp/tools           - List all tools`);
   console.log(`   GET  /mcp/prompts         - List all prompts`);
-  console.log(`   POST /mcp/prompts         - List all prompts`);
   console.log(`   GET  /mcp/resources       - List all resources`);
-  console.log(`   POST /mcp/resources       - List all resources`);
   console.log(`\n⚙️  Tool Execution Endpoints:`);
   console.log(`   GET  /mcp/calculate       - Calculate (query: operation, a, b)`);
   console.log(`   POST /mcp/calculate       - Calculate (body: operation, a, b)`);

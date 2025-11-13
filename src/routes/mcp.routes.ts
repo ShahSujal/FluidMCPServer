@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { MCPServer } from "../server.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { PAYMENT_CONFIG } from "../config/payment.config.js";
 
 const router = Router();
 
@@ -44,73 +45,110 @@ router.post("/initialize", async (req: Request, res: Response) => {
   }
 });
 
-// Tools List - GET and POST
+// Tools List - GET only
 router.get("/tools", (req: Request, res: Response) => {
   console.log("🔧 GET /mcp/tools - Listing tools");
   const mcpServer = new MCPServer();
   const tools = mcpServer.getTools();
   
-  res.json({
-    tools,
-    count: tools.length
-  });
-});
-
-router.post("/tools", (req: Request, res: Response) => {
-  console.log("🔧 POST /mcp/tools - Listing tools");
-  const mcpServer = new MCPServer();
-  const tools = mcpServer.getTools();
+  // Pricing map with token and chainId info
+  const pricingMap: Record<string, { 
+    price: string; 
+    network: string;
+    tokens: Array<{ address: string; symbol: string; decimals: number }>;
+    chainId: number;
+  }> = {
+    calculate: {
+      ...PAYMENT_CONFIG.tools.calculate,
+      tokens: [
+        { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
+      ],
+      chainId: 84532
+    },
+    get_weather: {
+      ...PAYMENT_CONFIG.tools.weather,
+      tokens: [
+        { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
+      ],
+      chainId: 84532
+    },
+    echo: {
+      ...PAYMENT_CONFIG.tools.echo,
+      tokens: [
+        { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
+      ],
+      chainId: 84532
+    },
+    get_timestamp: {
+      ...PAYMENT_CONFIG.tools.timestamp,
+      tokens: [
+        { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
+      ],
+      chainId: 84532
+    },
+  };
   
-  res.json({
-    tools,
-    count: tools.length
-  });
+  // Transform to simplified format with pricing
+  const simplifiedTools = tools.map(tool => ({
+    name: tool.name,
+    description: tool.description,
+    endpoint: `/mcp/${tool.name === 'get_weather' ? 'weather' : tool.name === 'get_timestamp' ? 'timestamp' : tool.name}`,
+    parameters: tool.inputSchema.properties ? 
+      Object.entries(tool.inputSchema.properties).map(([key, value]: [string, any]) => ({
+        name: key,
+        type: value.type,
+        description: value.description,
+        required: (tool.inputSchema.required as string[] | undefined)?.includes(key) || false,
+        enum: value.enum || undefined
+      })) : [],
+    pricing: pricingMap[tool.name] || { 
+      price: "$0.001", 
+      network: "base-sepolia",
+      tokens: [
+        { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
+      ],
+      chainId: 84532
+    }
+  }));
+  
+  res.json(simplifiedTools);
 });
 
-// Prompts List - GET and POST
+// Prompts List - GET only
 router.get("/prompts", (req: Request, res: Response) => {
   console.log("🔧 GET /mcp/prompts - Listing prompts");
   const mcpServer = new MCPServer();
   const prompts = mcpServer.getPrompts();
   
-  res.json({
-    prompts,
-    count: prompts.length
-  });
-});
-
-router.post("/prompts", (req: Request, res: Response) => {
-  console.log("🔧 POST /mcp/prompts - Listing prompts");
-  const mcpServer = new MCPServer();
-  const prompts = mcpServer.getPrompts();
+  // Transform to simplified format
+  const simplifiedPrompts = prompts.map(prompt => ({
+    name: prompt.name,
+    description: prompt.description,
+    parameters: prompt.arguments?.map(arg => ({
+      name: arg.name,
+      description: arg.description,
+      required: arg.required
+    })) || []
+  }));
   
-  res.json({
-    prompts,
-    count: prompts.length
-  });
+  res.json(simplifiedPrompts);
 });
 
-// Resources List - GET and POST
+// Resources List - GET only
 router.get("/resources", (req: Request, res: Response) => {
   console.log("🔧 GET /mcp/resources - Listing resources");
   const mcpServer = new MCPServer();
   const resources = mcpServer.getResources();
   
-  res.json({
-    resources,
-    count: resources.length
-  });
-});
-
-router.post("/resources", (req: Request, res: Response) => {
-  console.log("🔧 POST /mcp/resources - Listing resources");
-  const mcpServer = new MCPServer();
-  const resources = mcpServer.getResources();
+  // Return simplified format
+  const simplifiedResources = resources.map(resource => ({
+    name: resource.name,
+    uri: resource.uri,
+    description: resource.description,
+    mimeType: resource.mimeType
+  }));
   
-  res.json({
-    resources,
-    count: resources.length
-  });
+  res.json(simplifiedResources);
 });
 
 // MCP JSON-RPC endpoint (backward compatibility)
