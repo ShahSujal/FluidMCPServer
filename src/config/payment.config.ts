@@ -4,26 +4,26 @@ export const PAYMENT_CONFIG = {
   // Tool pricing in USD
   tools: {
     calculate: {
-      price: "$0.001",
+      price: "$0.1",
       network: "base-sepolia" as const,
     },
     weather: {
-      price: "$0.002", 
+      price: "$0.2", 
       network: "base-sepolia" as const,
     },
     echo: {
-      price: "$0.0005",
+      price: "$0.5",
       network: "base-sepolia" as const,
     },
     timestamp: {
-      price: "$0.0005",
+      price: "$0.5",
       network: "base-sepolia" as const,
     },
   },
   
   // JSON-RPC endpoint pricing
   jsonRpc: {
-    price: "$0.005",
+    price: "$0.5",
     network: "base-sepolia" as const,
   },
 };

@@ -102,7 +102,7 @@ router.get("/tools", (req: Request, res: Response) => {
         enum: value.enum || undefined
       })) : [],
     pricing: pricingMap[tool.name] || { 
-      price: "$0.001", 
+      price: "$0.1", 
       network: "base-sepolia",
       tokens: [
         { address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", symbol: "USDC", decimals: 6 }
